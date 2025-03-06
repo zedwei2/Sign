@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TENCENT US- COMPANY TRIPS & EVENTS</title>
+  <script src="./signature_pad.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: #f5f7fa;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      width: 100%;
+      max-width: 700px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .activity-info {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .activity-info h1,
+    .activity-info h2 {
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 24px;
+    }
+
+    .activity-info p {
+      color: #7f8c8d;
+      margin: 5px 0;
+    }
+
+    .activity-info .desc {
+      font-size: 14px;
+      color: #7f8c8d;
+      margin: 5px 0;
+    }
+
+    .input-group {
+      margin-bottom: 25px;
+    }
+
+    .input-group label {
+      display: block;
+      color: #34495e;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e6ed;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+
+    .signature-box {
+      border: 2px solid #e0e6ed;
+      border-radius: 8px;
+      margin: 20px 0;
+      position: relative;
+      background: white;
+    }
+
+    #signature-canvas {
+      width: 100%;
+      height: 250px;
+      cursor: crosshair;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2980b9;
+    }
+
+    .btn-secondary {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #c0392b;
+    }
+
+    .signature-clear {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 6px 12px;
+      border-radius: 5px;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid #e0e6ed;
+    }
+
+    /* 新增弹窗样式 */
+    .modal-dialog {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      padding: 25px;
+    }
+
+    .modal-header {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 0;
+      top: -5px;
+      color: #2c3e50;
+      font-size: 24px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 5px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #e74c3c;
+    }
+
+    .modal-title {
+      color: #2c3e50;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .modal-content {
+      color: #7f8c8d;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .modal-date {
+      color: #3498db;
+      font-size: 14px;
+      margin: 15px 0;
+    }
+
+    .modal-footer {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    /* 新增错误弹窗样式 - 继承原有modal样式并扩展 */
+    .modal-error .modal-title {
+      color: #e74c3c;
+      /* 标题改为警示红 */
+    }
+
+    .modal-error .modal-content::before {
+      content: "";
+      display: block;
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 768px) {
+
+      .activity-info h1,
+      .activity-info h2 {
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+
+      .modal-dialog {
+        width: 90%;
+        padding: 20px;
+      }
+
+      .modal-title {
+        font-size: 18px;
+      }
+
+      .modal-content {
+        font-size: 14px;
+      }
+
+      .container {
+        padding: 20px;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 活动信息 -->
+    <div class="activity-info">
+      <h1>TENCENT US- COMPANY TRIPS & EVENTS</h1>
+      <h2>LIABILITY WAIVER / RISK ACKNOWLEDGEMENT</h2>
+
+      <div class="desc">
+        <p>Tencent America LLC and its affiliates (including but not limited to, Tencent Cloud LLC, TLive LLC, Proxima
+          Beta U.S. LLC, and Sharp Growth (Canada) Limited) (collectively, "Company") sponsor special trips and events
+          to its valued employees every year...</p>
+
+        <p>Tencent America LLC and its affiliates (including but not limited to, Tencent Cloud LLC, TLive LLC, Proxima
+          Beta U.S. LLC, and Sharp Growth (Canada) Limited) (collectively, “Company”) sponsor special trips and events
+          to its valued employees every year. I understand that participation in company trips and events could involve
+          risk of physical injury, illness, death or property loss, and despite safety precautions, that Company cannot
+          guarantee safety thereof, as all risks cannot be prevented.  Company, does not provide accident insurance for
+          trip participants (and/or their guests and family members), and I understand that any medical expenses,
+          property loss, or other personal expenditures that result during or from these trips and events, are to be
+          borne by the participant (and/or their guests and family members).  I also hereby consent, give authorization
+          to trip leaders (if applicable) to secure any emergency medical treatment in event I am unable to, and I agree
+          to be responsible for the costs thereof.  </p>
+
+        <p>I further acknowledge that if I drive my own vehicle, or am a passenger in another’s private vehicle in
+          connection with these trips and events, that Company’s auto insurance does not cover such a private vehicle. I
+          also understand that Company cannot be responsible for assuring the safety and reliability of such private
+          transportation or driver, nor for any non-sponsored activities and travels that I (and/or my guests and family
+          members) might choose to participate in before, during or after the Company sponsored functions, and I (and/or
+          my guests and family members) therefore accept the risks and responsibilities associated with such private
+          vehicle travel and activities.</p>
+
+        <p>I further acknowledge that participants twenty-one (21) years of age and older are able to drink alcohol
+          during the event should they choose to do so. However, alcohol consumption is at the participant’s own
+          discretion, risk, and liability. Excessive alcohol consumption is not condoned by the company. The participant
+          hereby assumes all risks involved with the consumption of alcohol and unconditionally holds the company
+          harmless.</p>
+
+        <p>In consideration of the opportunity afforded, with full knowledge and acceptance of the risks associated with
+          these trips and any work related activities; and with full understanding of the risks associated with these
+          trips and any work related activities, I (and/or my guests and family members) hereby release, indemnify and
+          hold harmless Company, its predecessors, owners, successors and assigns, parent corporations, subsidiary
+          corporations, affiliates, (including but not limited to, Tencent Cloud LLC, TLive LLC, Proxima Beta U.S. LLC,
+          or Sharp Growth (Canada) Limited), insurers, reinsurers and the officers, directors, shareholders, partners,
+          employees, independent contractors, attorneys and agents, past or present, of each of the aforesaid
+          entities/individuals, heirs, executors, administrators, assigns, attorneys and agents, and all persons acting
+          under, by, through, or in concert with any of them, from all form and manner of risks inherent in, and from
+          all claims, suits and demands of any nature arising from participation in said trips, events and/or
+          activities. </p>
+
+        <p>I have read this agreement, fully understand its terms and have signed it freely and without inducement.
+          Shall any portion of this agreement be held to be invalid the balance, notwithstanding, shall continue in full
+          force and effect. </p>
+      </div>
+    </div>
+
+    <!-- 用户输入 -->
+    <div class="input-group">
+      <label for="username">Full Name</label>
+      <input type="text" id="username" placeholder="Enter your full name">
+    </div>
+
+    <!-- 签名区域 -->
+    <div class="signature-box">
+      <canvas id="signature-canvas"></canvas>
+      <div class="signature-clear" id="clearBtn">Clear Signature</div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="button-group">
+      <button class="btn btn-primary" id="submitBtn">Submit Agreement</button>
+    </div>
+  </div>
+  <script>
+    function showModal(config) {
+      // 创建遮罩层
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop';
+
+      // 弹窗主体
+      const modal = document.createElement('div');
+      modal.className = `modal-dialog ${config.type ? 'modal-' + config.type : ''}`;
+      modal.innerHTML = `
+        <div class="modal-header">
+            <button class="modal-close">&times;</button>
+            <h3 class="modal-title">${config.title}</h3>
+        </div>
+        <div class="modal-content">
+            <p>${config.content}</p>
+            ${config.date ? `<p class="modal-date">${config.date}</p>` : ''}
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary confirm-btn">${config.buttonText || 'OK'}</button>
+        </div>
+    `;
+
+      // 插入DOM
+      document.body.append(backdrop, modal);
+
+      // 绑定关闭事件
+      const closeModal = () => {
+        modal.remove();
+        backdrop.remove();
+      };
+
+      modal.querySelector('.modal-close').onclick = closeModal;
+      modal.querySelector('.confirm-btn').onclick = closeModal;
+
+      // 点击遮罩层关闭（可选）
+      backdrop.onclick = closeModal;
+    }
+
+    // Initialize signature pad
+    const canvas = document.getElementById('signature-canvas');
+    const signaturePad = new SignaturePad(canvas, {
+      backgroundColor: '#ffffff',
+      penColor: '#2c3e50',
+      minWidth: 1,
+      maxWidth: 3
+    });
+
+    // Canvas responsive adjustment
+    function resizeCanvas() {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext('2d').scale(ratio, ratio);
+      signaturePad.clear();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // Clear signature
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      signaturePad.clear();
+    });
+
+    // Submission handling
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const username = document.getElementById('username').value.trim();
+
+      if (!username) {
+        showModal({
+          type: 'error',
+          title: 'Missing Information',
+          content: 'Please enter your full name before submission.',
+          buttonText: 'Got it'
+        });
+        return;
+      }
+
+      if (signaturePad.isEmpty()) {
+        showModal({
+          type: 'error',
+          title: 'Signature Required',
+          content: 'Handwritten signature is mandatory for this agreement.',
+          buttonText: 'Understood'
+        });
+        return;
+      }
+
+      // Build submission data
+      const formData = {
+        username: username,
+        signature: signaturePad.toDataURL(),
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        // Example submission to backend
+        const response = await fetch('https://api.example.com/sign', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          showModal({
+            title: 'Submission Complete',
+            content: 'Thank you for attending the event.',
+            date: new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+          });
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('Submission failed:', error);
+        showModal({
+          type: 'error',
+          title: 'HTTP error',
+          content: 'Submission failed, please try again.',
+          buttonText: 'Ok'
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
